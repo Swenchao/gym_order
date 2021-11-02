@@ -12,9 +12,9 @@
 
 ## 文件说明
 
-1. [order.py]() : 原始脚本文件，可直接执行进行预约
+1. [order.py](https://github.com/Swenchao/gym_order/blob/main/order.py) : 原始脚本文件，可直接执行进行预约
 
-2. [aliyun.py]() : 阿里云函数脚本，粘到云函数平台可进行执行学习
+2. [aliyun.py](https://github.com/Swenchao/gym_order/blob/main/aliyun.py) : 阿里云函数脚本，粘到云函数平台可进行执行学习
 
 ## 使用说明
 
