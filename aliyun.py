@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import time
+
 import requests
 import datetime
 
@@ -84,13 +86,24 @@ def gym_order(date, time_detail):
     return r.json()
 
 
+# 查看是否预约成功
+def is_success_order(date):
+    url = "https://wechartdemo.zckx.net/Ticket/MyOrder?openId=" + openId
+    gym_html = s.get(url).text
+    new_date = date.split("-")[0] + '年' + date.split("-")[1] + '月' + date.split("-")[2] + '日'
+    if new_date in gym_html:
+        return True
+    return False
+
+
 # 微信通知
 def send_message(key, title, body):
     msg_url = "https://sc.ftqq.com/{}.send?text={}&desp={}".format(key, title, body)
     requests.get(msg_url)
 
+
 def handler(event, context):
-      # 预约时间
+    # 预约时间
     order_time = {
         "12": {"minDate": "12:00", "maxDate": "14:00", "strategy": "1000000175"},
         "14": {"minDate": "14:30", "maxDate": "16:30", "strategy": "1000000176"},
@@ -104,7 +117,12 @@ def handler(event, context):
 
     if flag:
         r = gym_order(date, time_detail)
-        if r.get("Code") == '100000':
+
+        # 发送请求后，挂起10分钟，再请求查看是否成功
+        time.sleep(6000)
+
+        is_success = is_success_order(date)
+        if is_success:
             send_message(server_key, str(gym_time) + "预约成功", r)
         else:
             send_message(server_key, str(gym_time) + "预约失败", r)

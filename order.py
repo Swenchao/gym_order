@@ -1,5 +1,7 @@
 import requests
 import datetime
+from bs4 import BeautifulSoup
+import time
 
 
 # 健身房预约时间
@@ -20,7 +22,7 @@ user_info = {
 }
 
 # 需要预约的时间（12 14 17）
-gym_time = 14
+gym_time = 17
 
 # 微信 openId（需要替换自己的）
 openId = ''
@@ -49,6 +51,7 @@ def is_gym_order(date, startTime, endTime):
     return False
 
 
+# 进行预约
 def gym_order(date, time_detail):
     url = "http://wechartdemo.zckx.net/Ticket/SaveOrder?"
 
@@ -80,6 +83,16 @@ def gym_order(date, time_detail):
     return r.json()
 
 
+# 查看是否预约成功
+def is_success_order(date):
+    url = "https://wechartdemo.zckx.net/Ticket/MyOrder?openId=" + openId
+    gym_html = s.get(url).text
+    new_date = date.split("-")[0] + '年' + date.split("-")[1] + '月' + date.split("-")[2] + '日'
+    if new_date in gym_html:
+        return True
+    return False
+
+
 # 微信通知
 def send_message(key, title, body):
     msg_url = "https://sc.ftqq.com/{}.send?text={}&desp={}".format(key, title, body)
@@ -87,6 +100,7 @@ def send_message(key, title, body):
 
 
 if __name__ == "__main__":
+
     # 预约时间
     order_time = {
         "12": {"minDate": "12:00", "maxDate": "14:00", "strategy": "1000000175"},
@@ -101,12 +115,14 @@ if __name__ == "__main__":
 
     if flag:
         r = gym_order(date, time_detail)
-        if r.get("Code") == '100000':
+
+        # 发送请求后，挂起10分钟，再请求查看是否成功
+        time.sleep(600)
+
+        is_success = is_success_order(date)
+        if is_success:
             send_message(server_key, str(gym_time) + "预约成功", r)
         else:
             send_message(server_key, str(gym_time) + "预约失败", r)
     else:
         send_message(server_key, str(gym_time) + "不可预约", flag)
-
-
-
