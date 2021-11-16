@@ -98,8 +98,9 @@ def is_success_order(date):
 
 # 微信通知
 def send_message(key, title, body):
-    msg_url = "https://sc.ftqq.com/{}.send?text={}&desp={}".format(key, title, body)
-    requests.get(msg_url)
+    if server_key != "":
+        msg_url = "https://sc.ftqq.com/{}.send?text={}&desp={}".format(key, title, body)
+        requests.get(msg_url)
 
 
 def handler(event, context):

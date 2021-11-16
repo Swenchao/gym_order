@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 import requests
 import datetime
-from bs4 import BeautifulSoup
 import time
 
 
@@ -9,6 +9,9 @@ class GymTime:
     def __init__(self, gym_dict):
         for key in gym_dict:
             setattr(self, key, gym_dict[key])
+
+    def __str__(self):
+        return ' '.join(('%s' % item for item in self.__dict__.values()))
 
 
 # server酱 key（不填无所谓，只不过无法收到通知）
@@ -39,15 +42,17 @@ def is_gym_order(date, startTime, endTime):
     url = "http://wechartdemo.zckx.net/API/TicketHandler.ashx?dataType=json&date=" + date + "&projectNo=1000000637&method=GetStrategyList";
     data = s.get(url).json().get("list")
 
+    # print(data)
+
     # 遍历判断
     for item in data:
         gym_item = GymTime(item)
+        print(gym_item.__dict__)
         if startTime == gym_item.sTime and endTime == gym_item.eTime:
             if gym_item.isCanReserve == 1 and gym_item.restCount > 0:
                 return True
             else:
                 return False
-
     return False
 
 
@@ -76,7 +81,7 @@ def gym_order(date, time_detail):
         'sellerNo': 'weixin'
     }
     url = url + 'dataType=json&orderJson=' + str(data)
-    print(url)
+    # print(url)
     r = s.post(url)
     # print(r.json())
 
@@ -111,7 +116,8 @@ if __name__ == "__main__":
     time_detail = order_time.get(str(gym_time))
 
     # 查看是否还可预约
-    flag = is_gym_order(date, time_detail.get("minDate"), time_detail.get("maxDate"))
+    # flag = is_gym_order(date, time_detail.get("minDate"), time_detail.get("maxDate"))
+    flag = True
 
     if flag:
         r = gym_order(date, time_detail)
@@ -126,3 +132,4 @@ if __name__ == "__main__":
             send_message(server_key, str(gym_time) + "预约失败", r)
     else:
         send_message(server_key, str(gym_time) + "不可预约", flag)
+
